@@ -1,0 +1,88 @@
+# Aaron McLachlan (Nev) - aaronnev.com
+
+> Creator, strategist, entrepreneur. Career spans advertising, content, startups, e-commerce, AI and cryptography. 100M+ content views. 4M+ hours watched. All pre-AI.
+
+## Writing
+
+### Not Your Average Marathon Video
+URL: https://aaronnev.com/writing/not-your-average-marathon-video/
+Behind the scenes of producing a documentary marathon film in remote Australia.
+
+### The Curse of the Country Song
+URL: https://aaronnev.com/writing/the-curse-of-the-country-song/
+Why country music's biggest hits are its saddest, and what that says about storytelling.
+
+### The Dark Why
+URL: https://aaronnev.com/writing/the-dark-why/
+Using negativity and insecurities as motivation for positive change. Featuring Turia Pitt, Rich Roll, Tyler the Creator.
+
+### How Your Space Can Improve (or Destroy) Your Life
+URL: https://aaronnev.com/writing/how-your-space-can-improve-or-destroy-your-life/
+Environmental psychology and how physical spaces shape behaviour and identity.
+
+### Why Bitcoin isn't crypto anymore
+URL: https://aaronnev.com/writing/why-bitcoin-isnt-crypto-anymore/
+Bitcoin's divergence from the broader crypto ecosystem.
+
+### everyone hates crypto, what now?
+URL: https://aaronnev.com/writing/everyone-hates-crypto-what-now/
+Crypto content strategy, reputation vs tech reality, why the word 'crypto' is dead but the tech is alive.
+
+### Beyond the 10x Developer
+URL: https://aaronnev.com/writing/beyond-the-10x-developer/
+AI tools and development. What happens when everyone has a 10x multiplier.
+
+### What Happens When Your AI Agent Switches Models
+URL: https://aaronnev.com/writing/what-happens-when-your-ai-agent-switches-models/
+Multi-model AI systems, identity continuity, and what it means when your AI changes underneath you.
+
+## Projects
+
+### Crossover Studio
+URL: https://aaronnev.com/projects/crossover/
+AI-native creative studio. Founder, 2024-present.
+
+### Blocmates - Onchain World
+URL: https://aaronnev.com/projects/blocmates/
+Weekly documentary-style crypto/tech video series. Creative Producer.
+
+### RealMarketCap
+URL: https://aaronnev.com/projects/realmarketcap/
+Crypto analytics tool. realmarketcap.xyz.
+
+### Struthless Studios
+URL: https://aaronnev.com/projects/struthless/
+Animation, illustration, YouTube. Co-founded. 1M subscribers. Adult Swim, Glue Factory.
+
+### Step One Clothing
+URL: https://aaronnev.com/projects/step-one/
+E-commerce fashion brand. Co-founded. Now ASX-listed, $87M revenue.
+
+### Lensloop
+URL: https://aaronnev.com/projects/lensloop/
+Production company. Built from $8K. 30+ clients inc. Gatorade, Nintendo, TikTok.
+
+## Companies Founded
+- Step One: ASX-listed, $87M revenue. Co-founded.
+- Struthless Studios: 1M YouTube subscribers. Co-founded.
+- Crossover Studio: AI-native creative studio. Founder, 2024-present.
+- Lensloop: Production company, 30+ clients. Director, 2017-2020.
+
+## Awards
+- Cannes Silver Lion: Samsung Slideliner campaign (Clemenger BBDO, 2014)
+
+## Expertise
+AI agents, multi-agent systems, cryptography, blockchain, creative strategy, content strategy, brand strategy, video production, YouTube, TikTok, advertising, e-commerce, startups, storytelling, documentary, animation.
+
+## Contact
+- Email: nev@crossover.to
+- X/Twitter: @nevaaron
+- YouTube: @nevaaron
+- LinkedIn: /in/aaronmclachlan
+- IMDB: /name/nm13410845
+
+## Machine-readable
+- Sitemap: https://aaronnev.com/sitemap.xml
+- RSS feed: https://aaronnev.com/feed.xml
+- Writing index: https://aaronnev.com/writing/
+- Projects index: https://aaronnev.com/projects/

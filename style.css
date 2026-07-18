@@ -1,0 +1,2169 @@
+/* ============================================================
+   NEV OS — Snow Leopard Desktop
+   ============================================================ */
+
+/* --- Design Tokens --- */
+:root {
+  --titlebar-active: linear-gradient(180deg, #e4e4e4, #c8c8c8);
+  --titlebar-inactive: linear-gradient(180deg, #f0f0f0, #dcdcdc);
+  --titlebar-border: #999;
+  --titlebar-text: #333;
+  --titlebar-text-inactive: #999;
+
+  --btn-close: #E8423D;
+  --btn-close-border: #b0332e;
+  --btn-minimize: #F5C842;
+  --btn-minimize-border: #c4a030;
+  --btn-maximize: #5AC837;
+  --btn-maximize-border: #449a2a;
+  --btn-inactive: #dddddd;
+
+  --window-bg: #ffffff;
+  --window-shadow: 0 3px 12px rgba(0,0,0,.15), 0 1px 4px rgba(0,0,0,.1);
+  --window-radius: 6px;
+
+  --selection-blue: #3d7cc7;
+  --selection-light: #d0e2f5;
+
+  --menubar-bg: rgba(232, 232, 232, 0.88);
+  --menubar-height: 30px;
+  --menubar-border: rgba(0,0,0,.15);
+
+  --dock-height: 86px;
+
+  /* Brushed metal — noise-textured metallic surface */
+  --metal-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65 0.02' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='0.08'/%3E%3C/svg%3E");
+  --metal-gradient: linear-gradient(180deg, #d8d8d8 0%, #c4c4c4 20%, #b8b8b8 50%, #c0c0c0 80%, #cccccc 100%);
+  --metal-border: #888;
+
+  /* Aqua blue gel */
+  --aqua-blue: linear-gradient(180deg, #7ec8fb 0%, #4aa3df 40%, #2b7ec7 60%, #3b8fd4 100%);
+  --aqua-blue-pressed: linear-gradient(180deg, #5ba8e0 0%, #2b7ec7 40%, #1a6ab5 60%, #2b7ec7 100%);
+  --aqua-grey: linear-gradient(180deg, #f0f0f0 0%, #d8d8d8 40%, #c0c0c0 60%, #d0d0d0 100%);
+  --aqua-grey-pressed: linear-gradient(180deg, #d0d0d0 0%, #b8b8b8 40%, #a0a0a0 60%, #b0b0b0 100%);
+
+  /* Gel button traits */
+  --gel-highlight: inset 0 1px 0 rgba(255,255,255,0.9);
+  --gel-shadow: inset 0 -2px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.2);
+  --gel-border-radius: 12px;
+
+  --font-system: "Lucida Grande", "Helvetica Neue", -apple-system, sans-serif;
+  --font-mono: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+  --font-size-ui: 12px;
+  --font-size-ui-sm: 11px;
+
+  --z-desktop: 1;
+  --z-windows: 10;
+  --z-menubar: 1000;
+  --z-dock: 999;
+  --z-context-menu: 2000;
+  --z-boot: 9999;
+  --z-dialog: 3000;
+}
+
+/* --- Reset --- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: var(--font-system);
+  font-size: var(--font-size-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+body {
+  background: #2a2a2e;
+  background-image: url('assets/images/nev-at-desk.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.15);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+a { color: inherit; text-decoration: none; }
+button { border: none; background: none; font: inherit; cursor: pointer; color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* --- Semantic content: hidden when JS active --- */
+#semantic-content {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  clip-path: inset(50%); white-space: nowrap;
+}
+.window__body [data-window] {
+  position: static; width: auto; height: auto;
+  overflow: visible; clip: auto; clip-path: none; white-space: normal;
+}
+
+
+/* ============================================================
+   BOOT SCREEN
+   ============================================================ */
+#boot-screen {
+  position: fixed; inset: 0; z-index: var(--z-boot);
+  background: #2a2a2e;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 32px; opacity: 1; transition: opacity 0.6s ease;
+}
+#boot-screen.boot--fade { opacity: 0; pointer-events: none; }
+#boot-screen.boot--hidden { display: none; }
+.boot-logo { opacity: 0; animation: boot-logo-in 0.8s ease forwards; }
+.boot-progress {
+  width: 180px; height: 5px; background: rgba(255,255,255,.15);
+  border-radius: 3px; overflow: hidden;
+  opacity: 0; animation: boot-logo-in 0.5s 0.4s ease forwards;
+}
+.boot-progress-bar {
+  width: 0%; height: 100%; background: rgba(255,255,255,.6);
+  border-radius: 3px; animation: boot-fill 1.1s 0.4s linear forwards;
+}
+@keyframes boot-logo-in { to { opacity: 1; } }
+@keyframes boot-fill {
+  0% { width: 0%; }
+  8% { width: 30%; }
+  12% { width: 30%; }
+  20% { width: 68%; }
+  75% { width: 68%; }
+  85% { width: 100%; }
+  100% { width: 100%; }
+}
+
+
+/* ============================================================
+   MENU BAR
+   ============================================================ */
+.menu-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--menubar-height); z-index: var(--z-menubar);
+  background: var(--menubar-bg);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--menubar-border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 10px; font-size: var(--font-size-ui);
+}
+.menu-bar__left, .menu-bar__right { display: flex; align-items: center; gap: 4px; }
+.menu-bar__apple { padding: 3px 10px; border-radius: 4px; display: flex; align-items: center; }
+.menu-bar__apple:hover { background: rgba(0,0,0,.08); }
+.menu-bar__apple img { display: block; }
+.menu-bar__name { font-weight: 700; padding: 3px 10px; letter-spacing: 0.5px; font-size: 13px; }
+.menu-bar__item { padding: 3px 10px; border-radius: 4px; color: #555; font-size: 13px; }
+.menu-bar__item:hover { background: rgba(0,0,0,.06); }
+.menu-bar__social { display: flex; align-items: center; gap: 6px; }
+.menu-bar__social a {
+  display: flex; align-items: center; padding: 4px 5px;
+  border-radius: 4px; color: #444; transition: color 0.15s;
+}
+.menu-bar__social a:hover { color: #111; background: rgba(0,0,0,.06); }
+.menu-bar__volume { position: relative; display: flex; align-items: center; margin-left: 2px; overflow: visible; }
+.menu-bar__volume-btn {
+  display: flex; align-items: center; padding: 4px 5px;
+  border-radius: 4px; color: #444; background: none; border: none;
+  cursor: pointer; transition: color 0.15s; font-size: 0;
+}
+.menu-bar__volume-btn:hover { color: #111; background: rgba(0,0,0,.06); }
+.menu-bar__volume-popup {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,.95); border: 1px solid rgba(0,0,0,.15);
+  border-radius: 6px; padding: 14px 10px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  z-index: 10001; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  width: 30px; height: 140px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; visibility: hidden; opacity: 0; pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+.menu-bar__volume-popup.is-open { visibility: visible; opacity: 1; pointer-events: auto; }
+.menu-bar__volume-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 110px; height: 4px; background: #ccc; border-radius: 2px;
+  outline: none; cursor: pointer;
+  transform: rotate(-90deg);
+}
+.menu-bar__volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 14px; height: 14px;
+  background: #fff; border: 1px solid #aaa; border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2); cursor: pointer;
+}
+.menu-bar__volume-slider::-moz-range-thumb {
+  width: 14px; height: 14px; background: #fff; border: 1px solid #aaa;
+  border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.2); cursor: pointer;
+}
+.menu-bar__clock {
+  font-variant-numeric: tabular-nums; padding-left: 10px;
+  color: #333; font-weight: 500; min-width: 48px; text-align: right; font-size: 13px;
+}
+
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+.desktop {
+  position: fixed; top: var(--menubar-height); left: 0; right: 0;
+  bottom: var(--dock-height); z-index: var(--z-desktop);
+}
+
+
+/* ============================================================
+   DESKTOP ICONS — absolute scatter
+   ============================================================ */
+.desktop-icons { position: absolute; inset: 0; z-index: 2; pointer-events: none; padding-bottom: 80px; }
+.desktop-icon {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center;
+  width: 76px; padding: 4px; border-radius: 4px;
+  cursor: default; -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+}
+.desktop-icon:focus-visible { outline: 2px solid var(--selection-blue); outline-offset: 2px; }
+.desktop-icon.selected .desktop-icon__label {
+  background: var(--selection-blue); color: #fff; border-radius: 2px;
+}
+.desktop-icon__img {
+  width: 64px; height: 64px; margin-bottom: 4px;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.25));
+}
+.desktop-icon__img img { width: 100%; height: 100%; object-fit: contain; }
+.desktop-icon__img--thumbnail {
+  background: #fff; padding: 3px; border: 1px solid #ccc;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.desktop-icon__img--thumbnail img { object-fit: cover; }
+.desktop-icon__label {
+  font-size: var(--font-size-ui-sm); color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.7), 0 0 6px rgba(0,0,0,.4);
+  text-align: center; padding: 1px 4px; word-break: break-word; line-height: 1.3;
+}
+.desktop-icon--disabled { opacity: 0.4; }
+
+/* Dragging state */
+.desktop-icon--dragging {
+  opacity: 0.7;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.4));
+  cursor: grabbing !important;
+  transition: none !important;
+  z-index: 100;
+}
+
+
+/* ============================================================
+   WINDOW CHROME
+   ============================================================ */
+.window {
+  position: absolute; min-width: 240px; min-height: 120px;
+  border-radius: var(--window-radius);
+  box-shadow: var(--window-shadow);
+  display: flex; flex-direction: column; overflow: hidden;
+  z-index: var(--z-windows);
+  opacity: 0; transform: scale(0.85);
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.window.window--visible { opacity: 1; transform: scale(1); }
+.window.window--closing {
+  opacity: 0; transform: scale(0.95);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.window.window--minimizing {
+  opacity: 0; transform: scale(0.5) translateY(100px);
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+.window.window--restoring { animation: window-restore 0.25s ease forwards; }
+@keyframes window-restore {
+  from { opacity: 0; transform: scale(0.5) translateY(100px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.window.window--inactive .window__titlebar { background: var(--titlebar-inactive); }
+.window.window--inactive .window__title { color: var(--titlebar-text-inactive); }
+.window.window--inactive .traffic-light { background-image: url('assets/ui/close-inactive-disabled-color.png') !important; opacity: 0.6; }
+.window.window--inactive .traffic-light::after { display: none; }
+
+.window__titlebar {
+  height: 22px; background: var(--titlebar-active);
+  border-bottom: 1px solid rgba(0,0,0,.15);
+  display: flex; align-items: center; padding: 0 8px;
+  cursor: grab; flex-shrink: 0; position: relative;
+}
+.window__titlebar:active { cursor: grabbing; }
+.window__titlebar-buttons { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+
+.traffic-light {
+  width: 14px; height: 14px; border: none; border-radius: 0;
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+  cursor: pointer; position: relative;
+}
+.traffic-light::after { display: none; }
+/* Active state (default) — glossy 3D orbs from real Snow Leopard theme */
+.traffic-light--close { background-image: url('assets/ui/close-active-color.png'); }
+.traffic-light--minimize { background-image: url('assets/ui/minimize-active-color.png'); }
+.traffic-light--maximize { background-image: url('assets/ui/zoom-active-color.png'); }
+/* Hover/rollover — orb with × − + symbol baked into sprite */
+.window__titlebar:hover .traffic-light--close { background-image: url('assets/ui/close-rollover-color.png'); }
+.window__titlebar:hover .traffic-light--minimize { background-image: url('assets/ui/minimize-rollover-color.png'); }
+.window__titlebar:hover .traffic-light--maximize { background-image: url('assets/ui/zoom-rollover-color.png'); }
+/* Pressed — scoped under titlebar:hover to beat hover specificity (0-3-0 < 0-4-0) */
+.window__titlebar:hover .traffic-light--close:active { background-image: url('assets/ui/close-pd-color.png'); }
+.window__titlebar:hover .traffic-light--minimize:active { background-image: url('assets/ui/minimize-pd-color.png'); }
+.window__titlebar:hover .traffic-light--maximize:active { background-image: url('assets/ui/zoom-pd-color.png'); }
+
+.window__title {
+  position: absolute; left: 0; right: 0; text-align: center;
+  font-size: var(--font-size-ui-sm); font-weight: 500;
+  color: var(--titlebar-text); pointer-events: none;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 70px;
+}
+
+.window__body { flex: 1; overflow: auto; background: var(--window-bg); position: relative; }
+
+.window__resize {
+  position: absolute; bottom: 0; right: 0; width: 16px; height: 16px;
+  cursor: nwse-resize; z-index: 2;
+}
+.window__resize::after {
+  content: ""; position: absolute; bottom: 3px; right: 3px;
+  width: 8px; height: 8px;
+  border-right: 2px solid rgba(0,0,0,.15); border-bottom: 2px solid rgba(0,0,0,.15);
+}
+
+
+/* ============================================================
+   TEXTEDIT TOOLBAR (decorative)
+   ============================================================ */
+.textedit-toolbar {
+  height: 28px; background: linear-gradient(180deg, #f2f2f2, #e2e2e2);
+  border-bottom: 1px solid #c0c0c0;
+  display: flex; align-items: center; padding: 0 12px;
+  font-size: var(--font-size-ui-sm); color: #888; flex-shrink: 0; gap: 8px;
+}
+.textedit-toolbar span { color: #999; }
+
+
+/* ============================================================
+   WINDOW TYPES
+   ============================================================ */
+
+/* --- TextEdit --- */
+.window--textedit .window__body {
+  background: #fefefe;
+  padding: 16px 20px;
+  font-family: var(--font-system); font-size: 13px; line-height: 1.7;
+  color: #222; user-select: text; cursor: text;
+}
+.window--textedit .textedit-body h1 { display: none; }
+.window--textedit .textedit-body p { margin-bottom: 12px; }
+.window--textedit .textedit-body a {
+  color: var(--selection-blue); text-decoration: underline; text-underline-offset: 2px;
+}
+
+/* --- Finder --- */
+.window--finder .window__body { padding: 0; }
+.finder-toolbar {
+  height: 26px; background: linear-gradient(180deg, #f0f0f0, #e0e0e0);
+  border-bottom: 1px solid #c0c0c0;
+  display: flex; align-items: center; padding: 0 10px;
+  font-size: var(--font-size-ui-sm); color: #666;
+}
+.finder-columns {
+  display: grid; grid-template-columns: 1fr 100px 60px; height: 22px;
+  background: linear-gradient(180deg, #eee, #ddd); border-bottom: 1px solid #c0c0c0;
+  align-items: center; padding: 0 10px;
+  font-size: var(--font-size-ui-sm); font-weight: 500; color: #555;
+}
+.finder-list { list-style: none; }
+.finder-row {
+  display: grid; grid-template-columns: 1fr 100px 60px;
+  align-items: center; padding: 4px 10px;
+  font-size: var(--font-size-ui); border-bottom: 1px solid #eee;
+  cursor: default; transition: background 0.08s;
+}
+.finder-row:hover { background: var(--selection-light); }
+.finder-row:active, .finder-row.selected { background: var(--selection-blue); color: #fff; }
+.finder-row__name { display: flex; align-items: center; gap: 6px; }
+.finder-row__icon { width: 16px; height: 16px; flex-shrink: 0; object-fit: contain; }
+.finder-row__date, .finder-row__size { font-size: var(--font-size-ui-sm); color: #888; }
+.finder-row:active .finder-row__date, .finder-row:active .finder-row__size,
+.finder-row.selected .finder-row__date, .finder-row.selected .finder-row__size { color: rgba(255,255,255,.7); }
+
+/* Projects Finder overrides */
+.finder-columns--projects { grid-template-columns: 1fr 140px 80px; }
+.finder-row--project {
+  grid-template-columns: 1fr 140px 80px;
+  grid-template-rows: auto auto;
+  padding: 5px 10px 4px;
+}
+.finder-row__kind { font-size: var(--font-size-ui-sm); color: #888; }
+.finder-row__desc {
+  grid-column: 1 / -1;
+  font-size: 11px; color: #999; margin-top: 1px;
+  padding-left: 22px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.finder-row:active .finder-row__kind, .finder-row.selected .finder-row__kind,
+.finder-row:active .finder-row__desc, .finder-row.selected .finder-row__desc { color: rgba(255,255,255,.7); }
+
+/* --- Folder (Screen Clean) --- */
+.window--folder .window__body { padding: 0; }
+
+/* --- Article in TextEdit --- */
+.window--article .window__body {
+  background: #fefefe;
+  padding: 20px 24px;
+  font-family: var(--font-system); font-size: 13px; line-height: 1.7;
+  color: #222; user-select: text; cursor: text;
+}
+.window--article h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; font-family: var(--font-system); }
+.window--article time { display: block; font-size: var(--font-size-ui-sm); color: #888; margin-bottom: 16px; }
+.window--article p { margin-bottom: 12px; }
+.window--article h4 { font-size: 13px; font-weight: 700; margin: 20px 0 8px; font-family: var(--font-system); }
+.window--article figure { margin: 16px 0; }
+.window--article figcaption { font-size: 10px; color: #888; margin-top: 6px; line-height: 1.5; font-style: italic; }
+.window--article img { border-radius: 4px; border: 1px solid #eee; }
+.window--article a { color: var(--selection-blue); text-decoration: underline; }
+.window--article hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
+.window--article strong { font-weight: 700; }
+.window--article em { font-style: italic; }
+
+/* --- Project Window --- */
+.window--project .window__body {
+  padding: 20px 24px; background: #fff;
+  font-family: var(--font-system); font-size: 13px; line-height: 1.7;
+}
+.window--project h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.window--project .project__meta { font-size: var(--font-size-ui-sm); color: #888; margin-bottom: 12px; }
+.window--project p { margin-bottom: 10px; color: #333; }
+.window--project img { border-radius: 4px; margin-top: 12px; }
+.window--project .project__videos { margin-top: 16px; display: flex; flex-direction: column; gap: 16px; }
+.window--project .project__video { width: 100%; }
+.window--project .project__video-credit { font-size: 11px; color: #666; margin-top: 6px; margin-bottom: 0; }
+
+/* Responsive YouTube embeds */
+.window--project .youtube-embed {
+  position: relative;
+  width: 100%;
+  background: #000;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.window--project .youtube-embed::before {
+  content: "";
+  display: block;
+  padding-top: 56.25%; /* 16:9 fallback */
+}
+.window--project .youtube-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+@supports (aspect-ratio: 16 / 9) {
+  .window--project .youtube-embed { aspect-ratio: 16 / 9; }
+  .window--project .youtube-embed::before { padding-top: 0; }
+}
+
+
+/* ============================================================
+   ITUNES MINI PLAYER — Brushed Metal + Aqua
+   ============================================================ */
+.window--itunes-mini { border-radius: 8px; }
+.window--itunes-mini .window__titlebar {
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  height: 20px;
+}
+.window--itunes-mini .window__titlebar { border-bottom: none; }
+.window--itunes-mini .window__body {
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  padding: 4px 10px 8px; overflow: hidden; cursor: pointer;
+}
+
+/* LCD box inside mini player */
+.mini-lcd { margin-bottom: 6px; }
+.mini-player__title {
+  text-align: center; font-size: 11px; font-weight: 600; color: #2a2c24;
+  margin-bottom: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mini-player__artist {
+  text-align: center; font-size: 9px; color: #4a4c40; margin-bottom: 4px;
+}
+
+.mini-player__controls {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  position: relative;
+}
+.mini-ctrl {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--aqua-grey);
+  border: 1px solid #999;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #444; cursor: pointer;
+  position: relative; overflow: hidden;
+  box-shadow: var(--gel-highlight), var(--gel-shadow);
+}
+.mini-ctrl:hover { background: linear-gradient(180deg, #f8f8f8, #e0e0e0 40%, #d0d0d0 60%, #e0e0e0 100%); }
+.mini-ctrl:active { background: var(--aqua-grey-pressed); }
+.mini-ctrl--play {
+  width: 32px; height: 32px; font-size: 13px;
+  background: var(--aqua-grey);
+  border: 2px solid #4a90d9; color: #444;
+  box-shadow: var(--gel-highlight), var(--gel-shadow), 0 0 4px rgba(74,144,217,0.3);
+}
+.mini-ctrl--play:hover {
+  background: linear-gradient(180deg, #f8f8f8, #e0e0e0 40%, #d0d0d0 60%, #e0e0e0 100%);
+}
+.mini-ctrl--play:active { background: var(--aqua-grey-pressed); }
+.mini-player__vol {
+  display: flex; align-items: center; gap: 3px;
+  position: absolute; left: 0;
+}
+.mini-vol-slider { width: 50px; height: 3px; cursor: pointer; }
+
+
+/* ============================================================
+   ITUNES 6 FULL WINDOW — Brushed Metal + Aqua
+   ============================================================ */
+.window--itunes .window__titlebar {
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  border-bottom: none;
+}
+.window--itunes .window__body {
+  padding: 0; background: #f5f5f5;
+  display: flex; flex-direction: column;
+}
+
+.itunes-header-bar {
+  height: 72px;
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  display: flex; align-items: center; padding: 0 12px; gap: 8px;
+  flex-shrink: 0; border-bottom: 1px solid var(--metal-border);
+}
+.itunes-header__controls { display: flex; gap: 4px; }
+.itunes-hdr-btn {
+  color: #444; font-size: 13px; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--aqua-grey);
+  border: 1px solid #999; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  box-shadow: var(--gel-highlight), var(--gel-shadow);
+}
+.itunes-hdr-btn:hover { background: linear-gradient(180deg, #f8f8f8, #e0e0e0 40%, #d0d0d0 60%, #e0e0e0 100%); }
+.itunes-hdr-btn:active { background: var(--aqua-grey-pressed); }
+.itunes-hdr-btn--play {
+  font-size: 15px; width: 32px; height: 32px;
+}
+
+/* Apple logo */
+.itunes-header__apple {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+}
+.itunes-header__apple svg { fill: #555; opacity: 0.7; }
+
+/* View mode buttons */
+.itunes-header__views { display: flex; gap: 1px; }
+.itunes-view-btn {
+  color: #555; font-size: 11px; padding: 2px 6px; cursor: pointer;
+  background: var(--aqua-grey);
+  border: 1px solid #999; line-height: 1;
+  box-shadow: var(--gel-highlight), var(--gel-shadow);
+}
+.itunes-view-btn:first-child { border-radius: 3px 0 0 3px; }
+.itunes-view-btn:last-child { border-radius: 0 3px 3px 0; }
+.itunes-view-btn--active {
+  background: linear-gradient(180deg, #d0d0d0, #b8b8b8 40%, #a8a8a8 60%, #b8b8b8 100%);
+  color: #222;
+}
+
+.itunes-header__volume { width: 110px; display: flex; align-items: center; gap: 3px; }
+.itunes-vol-icon { display: flex; align-items: center; flex-shrink: 0; opacity: 0.7; }
+.itunes-volume-slider { width: 100%; flex: 1; }
+
+/* Now-playing display — muted warm-grey LCD (iTunes 5/6 style) */
+.itunes-header__display {
+  flex: 1; text-align: center; font-size: 11px;
+  background: linear-gradient(180deg, #b8bab0 0%, #c8cab8 20%, #d2d4c8 50%, #c8cab8 80%, #b8bab0 100%);
+  border: 1px solid #8a8c80;
+  border-radius: 4px;
+  padding: 6px 10px;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.35), inset 0 -1px 0 rgba(255,255,255,0.15), 0 1px 0 rgba(255,255,255,0.5);
+}
+.itunes-display__title {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #2a2c24;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.itunes-display__progress-row {
+  display: flex; align-items: center; gap: 6px; margin-top: 3px;
+}
+.itunes-display__elapsed,
+.itunes-display__remaining {
+  font-size: 9px; color: #3a3c30; min-width: 28px;
+  font-variant-numeric: tabular-nums;
+}
+.itunes-display__elapsed { text-align: right; }
+.itunes-display__remaining { text-align: left; }
+.itunes-display__progress {
+  flex: 1; height: 6px; background: rgba(0,0,0,0.12); border-radius: 3px;
+  overflow: visible; cursor: pointer; position: relative;
+}
+.itunes-display__progress-fill {
+  height: 100%; background: linear-gradient(90deg, #5a7a60, #6a8a70); border-radius: 3px;
+  width: 0%; transition: width 0.25s linear;
+  pointer-events: none;
+}
+.itunes-header__search { width: 120px; }
+.itunes-search {
+  width: 100%; height: 22px; border-radius: 14px;
+  border: 1px solid #7ab8e0; background: #fff;
+  color: #333; font-size: 10px; padding: 0 10px; outline: none;
+}
+.itunes-search:focus {
+  box-shadow: 0 0 4px rgba(122,184,224,0.5);
+  border-color: #5a98c8;
+}
+
+.itunes-main { flex: 1; display: flex; overflow: hidden; }
+
+/* Sidebar — iTunes 6 blue-tinted pinstripe */
+.itunes-sidebar {
+  width: 150px;
+  background:
+    repeating-linear-gradient(180deg,
+      rgba(200,210,230,0.3) 0px, rgba(200,210,230,0.3) 1px,
+      rgba(220,228,240,0.15) 1px, rgba(220,228,240,0.15) 2px),
+    linear-gradient(180deg, #e8ecf2, #dde2ea);
+  border-right: 1px solid #b0b0b8;
+  padding: 8px 0; overflow-y: auto; flex-shrink: 0;
+}
+.itunes-sidebar__heading {
+  font-size: 9px; font-weight: 700; color: #888;
+  letter-spacing: 0.5px; padding: 8px 12px 4px;
+}
+.itunes-sidebar__item {
+  padding: 3px 12px; font-size: 11px; cursor: default;
+  border-radius: 8px; margin: 1px 4px;
+  display: flex; align-items: center;
+}
+.itunes-sidebar__item:hover:not(.itunes-sidebar__item--active) {
+  background: rgba(74,140,200,0.12);
+}
+.itunes-sidebar__item--active {
+  background:
+    /* Specular highlight — bright white glow, top half */
+    radial-gradient(80% 50% at 50% 15%,
+      rgba(255,255,255,0.85) 0%,
+      rgba(255,255,255,0.4) 35%,
+      transparent 70%),
+    /* Base blue gradient — bright top to deep bottom */
+    linear-gradient(180deg,
+      #5aacf0 0%, #3a90e0 20%, #2878d4 40%,
+      #1c64c0 60%, #1454b0 80%, #0e3c90 100%);
+  color: #fff;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    inset 0 -1px 0 rgba(0,0,0,0.35),
+    inset 0 -3px 5px rgba(0,10,60,0.25),
+    0 1px 2px rgba(0,0,0,0.12);
+  border-radius: 8px;
+  position: relative; overflow: hidden;
+  border: 1px solid rgba(0,20,80,0.35);
+  border-top-color: rgba(120,180,255,0.4);
+  padding: 4px 12px;
+}
+.itunes-sidebar__item--active::before {
+  content: '';
+  position: absolute;
+  top: 1px; left: 5%; right: 5%; height: 45%;
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0.8) 0%,
+    rgba(255,255,255,0.4) 40%,
+    rgba(255,255,255,0.0) 100%);
+  border-radius: 6px 6px 50% 50%;
+  pointer-events: none;
+}
+
+/* Sidebar colored icons */
+.itunes-sidebar__icon {
+  display: inline-block; width: 12px; height: 12px;
+  border-radius: 2px; margin-right: 6px; flex-shrink: 0;
+}
+.itunes-sidebar__icon--music { background: linear-gradient(135deg, #e86cff, #9b30ff); }
+.itunes-sidebar__icon--movies { background: linear-gradient(135deg, #9060e0, #6030b0); }
+.itunes-sidebar__icon--tv { background: linear-gradient(135deg, #60a0e0, #3070c0); }
+.itunes-sidebar__icon--podcasts { background: linear-gradient(135deg, #c060ff, #8030d0); }
+.itunes-sidebar__icon--radio { background: linear-gradient(135deg, #40c080, #208060); }
+.itunes-sidebar__icon--store { background: linear-gradient(135deg, #7090ff, #4060e0); }
+.itunes-sidebar__icon--genius { background: linear-gradient(135deg, #60d060, #30a030); }
+
+.itunes-content { flex: 1; overflow: auto; }
+
+.itunes-table { min-width: 100%; width: max-content; border-collapse: collapse; font-size: var(--font-size-ui); }
+.itunes-table thead {
+  background-image: var(--metal-noise), linear-gradient(180deg, #e8e8e8, #d0d0d0);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  position: sticky; top: 0;
+}
+.itunes-table th {
+  text-align: left; padding: 4px 8px; font-weight: 500;
+  font-size: var(--font-size-ui-sm); color: #555; border-bottom: 1px solid #b0b0b0;
+  border-right: 1px solid #c0c0c0;
+}
+.itunes-table th:last-child { border-right: none; }
+.itunes-table td { padding: 3px 8px; border-bottom: 1px solid #e0e8f0; white-space: nowrap; }
+.itunes-table th { white-space: nowrap; }
+.itunes-table tbody tr { cursor: default; transition: background 0.08s; }
+.itunes-table tbody tr:nth-child(even) { background: #e8f0ff; }
+.itunes-table tbody tr:hover { background: var(--selection-light); }
+.itunes-table tbody tr.itunes-row--playing {
+  background: var(--selection-blue) !important; color: #fff;
+}
+.itunes-table tbody tr.itunes-row--playing td { color: #fff; }
+.itunes-table .track-num { width: 30px; text-align: right; color: #999; }
+.itunes-table .itunes-check { width: 24px; color: #999; }
+.itunes-table .itunes-speaker { display: none; color: #fff; font-size: 10px; margin-right: 4px; }
+.itunes-table tbody tr.itunes-row--playing .itunes-speaker { display: inline; }
+.itunes-table .itunes-time { width: 50px; color: #888; }
+.itunes-table tbody tr.itunes-row--playing .itunes-time { color: rgba(255,255,255,.8); }
+.itunes-table .itunes-genre { color: #888; }
+.itunes-rating { color: #d0d0d0; font-size: 10px; letter-spacing: 1px; white-space: nowrap; }
+.itunes-rating .filled { color: #999; }
+.itunes-table tbody tr.itunes-row--playing .itunes-rating .filled { color: rgba(255,255,255,.8); }
+.itunes-table tbody tr.itunes-row--playing .itunes-rating { color: rgba(255,255,255,.3); }
+.itunes-plays { color: #888; width: 40px; text-align: right; }
+.itunes-table tbody tr.itunes-row--playing .itunes-plays { color: rgba(255,255,255,.8); }
+
+.itunes-status-bar {
+  height: 22px;
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  border-top: 1px solid #b0b0b0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #555; flex-shrink: 0;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+}
+
+
+/* ============================================================
+   LIMEWIRE WINDOW
+   ============================================================ */
+.window--limewire .window__body { padding: 0; background: #f0f0e8; }
+.limewire-header {
+  height: 26px; background: linear-gradient(180deg, #4a8c2e, #357021);
+  display: flex; align-items: center; padding: 0 10px;
+  color: #fff; font-size: var(--font-size-ui-sm); font-weight: 600;
+  border-bottom: 1px solid #2a5a15;
+}
+.limewire-file-list { list-style: none; }
+.limewire-file {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 10px; font-size: var(--font-size-ui); border-bottom: 1px solid #ddd; cursor: default;
+}
+.limewire-file:hover { background: #e8e8d8; }
+.limewire-file__name { font-family: var(--font-mono); font-size: 11px; }
+.limewire-file__status { font-size: 10px; color: #888; white-space: nowrap; }
+.limewire-file__status--downloading { color: #4a8c2e; font-weight: 500; }
+.limewire-progress {
+  width: 80px; height: 8px; background: #ddd; border-radius: 4px;
+  overflow: hidden; margin-left: 8px; display: inline-block; vertical-align: middle;
+}
+.limewire-progress__bar {
+  height: 100%; border-radius: 4px;
+  background: url('assets/ui/progress-fill-blue.png') repeat-x;
+  background-size: auto 100%;
+}
+
+
+/* ============================================================
+   MAIL.APP COMPOSE WINDOW
+   ============================================================ */
+.window--mail .window__body { padding: 0; background: #fff; display: flex; flex-direction: column; }
+.mail-field {
+  display: flex; align-items: center; padding: 6px 12px;
+  border-bottom: 1px solid #e0e0e0; font-size: 12px;
+}
+.mail-field__label { color: #888; width: 55px; flex-shrink: 0; font-weight: 500; }
+.mail-field__value { color: #555; }
+.mail-field input {
+  flex: 1; border: none; outline: none;
+  font-size: 12px; font-family: var(--font-system); padding: 2px 0;
+}
+.mail-body {
+  flex: 1; display: flex; flex-direction: column;
+}
+.mail-body textarea {
+  flex: 1; width: 100%; border: none; outline: none; resize: none;
+  padding: 12px; font-size: 13px; line-height: 1.6;
+  font-family: var(--font-system); min-height: 160px;
+}
+.mail-actions {
+  padding: 8px 12px; border-top: 1px solid #e0e0e0;
+  display: flex; justify-content: flex-end;
+}
+.mail-send {
+  background: linear-gradient(180deg,
+    #7ec8fb 0%, #4ca4e8 25%, #3580d4 50%, #4ca4e8 75%, #6ab4f0 100%);
+  color: #fff; border-radius: 5px; padding: 4px 16px;
+  font-size: 12px; font-weight: 500; border: 1px solid #2060a0;
+  cursor: pointer;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.15);
+}
+.mail-send:hover { background: linear-gradient(180deg,
+  #8cd4ff 0%, #5cb0f0 25%, #4090e0 50%, #5cb0f0 75%, #7ac0f5 100%); }
+.mail-send:active { background: linear-gradient(180deg,
+  #5098d0 0%, #3580c4 25%, #2a6ab4 50%, #3580c4 75%, #4ca4e0 100%); }
+
+
+/* ============================================================
+   PREVIEW.APP WINDOW
+   ============================================================ */
+.window--preview .window__body {
+  padding: 0; background: #e8e8e8; display: flex; flex-direction: column;
+}
+.preview-toolbar {
+  height: 24px;
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  border-bottom: 1px solid #bbb;
+  display: flex; align-items: center; padding: 0 10px;
+  font-size: 11px; color: #888; flex-shrink: 0;
+}
+.preview-image-wrap {
+  flex: 1; overflow: auto;
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px; background: #d0d0d0;
+}
+.preview-image-wrap img {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+
+/* ============================================================
+   QUICKTIME 7 PLAYER — Brushed Metal Transport
+   ============================================================ */
+.window--quicktime .window__titlebar {
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  border-bottom: none;
+}
+.window--quicktime .window__body {
+  padding: 0; background: #000;
+  display: flex; flex-direction: column;
+}
+
+/* Video area */
+.qt7-viewer { flex: 1; background: #000; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.qt7-viewer video { width: 100%; height: 100%; object-fit: contain; }
+.qt7-viewer video::-webkit-media-controls { display: none !important; }
+
+/* Transport bar — always visible, brushed metal */
+.qt7-transport {
+  background-image: var(--metal-noise), var(--metal-gradient);
+  background-size: 300px 300px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  border-top: 1px solid #999;
+  padding: 8px 12px 12px; flex-shrink: 0;
+  border-radius: 0 0 4px 4px;
+}
+
+/* QuickTime scrub track — adds position:relative for the diamond handle */
+.qt7-scrub-track { position: relative; }
+.qt7-scrub-handle {
+  position: absolute; top: 50%; left: 0%;
+  width: 7px; height: 7px;
+  background: linear-gradient(135deg, #ddd, #aaa);
+  border: 1px solid #888;
+  transform: translate(-50%, -50%) rotate(45deg);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  z-index: 1;
+}
+
+/* Row 2: volume — buttons — playlist */
+.qt7-ctrl-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 8px;
+}
+.qt7-vol {
+  display: flex; align-items: center; gap: 3px; width: 110px; flex-shrink: 0;
+}
+.qt7-vol-icon { display: flex; align-items: center; flex-shrink: 0; opacity: 0.7; }
+.qt7-vol-slider { flex: 1; height: 28px; padding: 4px 0; }
+.qt7-btns {
+  display: flex; align-items: center; gap: 4px;
+  flex: 1; justify-content: center;
+}
+.qt7-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--aqua-grey);
+  border: 1px solid #999;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #444; cursor: pointer;
+  position: relative; overflow: hidden;
+  box-shadow: var(--gel-highlight), var(--gel-shadow);
+}
+.qt7-btn:hover { background: linear-gradient(180deg, #f8f8f8, #e0e0e0 40%, #d0d0d0 60%, #e0e0e0 100%); }
+.qt7-btn:active { background: var(--aqua-grey-pressed); }
+.qt7-btn--play { width: 34px; height: 34px; font-size: 14px; }
+.qt7-btn::before {
+  content: '';
+  position: absolute; top: 1px; left: 10%;
+  width: 80%; height: 45%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Playlist drawer */
+.qt7-playlist-drawer {
+  display: none; background: #1a1a1a; border-top: 1px solid #555;
+  max-height: 140px; overflow-y: auto;
+}
+.qt7-playlist-drawer.qt7-playlist--open { display: block; }
+.qt7-playlist-item {
+  padding: 4px 10px; font-size: 11px; color: #ccc; cursor: pointer;
+  border-bottom: 1px solid #333;
+}
+.qt7-playlist-item:hover { background: #333; color: #fff; }
+.qt7-playlist-item--active { background: var(--selection-blue); color: #fff; }
+
+.quicktime-placeholder {
+  color: #666; font-size: 13px; text-align: center; padding: 40px;
+}
+
+
+/* ============================================================
+   DOCK — Glass shelf
+   ============================================================ */
+.dock {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--dock-height); z-index: var(--z-dock);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 2px;
+}
+/* Floor glow under the shelf */
+.dock::before {
+  content: '';
+  position: absolute; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% + 60px); height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.dock__items {
+  display: flex; align-items: flex-end; gap: 1px;
+  /* Transparent container — visual shelf is ::after pseudo-element */
+  background: none; border: none; border-radius: 0; box-shadow: none;
+  padding: 4px 14px 16px;
+  min-height: 56px; max-width: 90vw;
+  overflow: visible; position: relative;
+}
+/* Glass shelf floor — 3D platform, icons sit ON TOP, reflections show through */
+.dock__items::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: -16px; right: -16px;
+  height: 62%;
+  /* Frosted glass shelf — warm mauve-gray, Snow Leopard style */
+  background: linear-gradient(180deg,
+    rgba(185,175,190,0.55) 0%,
+    rgba(163,151,167,0.50) 15%,
+    rgba(140,130,145,0.48) 35%,
+    rgba(121,111,124,0.52) 60%,
+    rgba(105,96,110,0.55) 80%,
+    rgba(90,82,96,0.58) 100%);
+  backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  /* Trapezoid: top edge narrower, bottom wider — 3D shelf perspective */
+  clip-path: polygon(3% 0%, 97% 0%, 100% 100%, 0% 100%);
+  border-top: 1px solid rgba(255,255,255,0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 -2px 4px rgba(0,0,0,0.08),
+    0 0 20px rgba(0,0,0,0.12),
+    0 4px 16px rgba(0,0,0,0.08);
+  z-index: -1;
+  pointer-events: none;
+}
+.dock__items:empty { display: none; }
+
+.dock-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 2px 4px; border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease-out, margin 0.15s ease-out;
+  transform-origin: bottom center;
+  -webkit-tap-highlight-color: transparent; position: relative;
+  z-index: 1;
+}
+/* JS handles magnification via mousemove — these disable CSS transitions during active hover */
+.dock__items--magnifying .dock-item { transition: none; }
+.dock__items--magnifying .dock-item__tooltip { opacity: 0; }
+.dock__items--magnifying .dock-item:hover .dock-item__tooltip { opacity: 1; }
+
+.dock-item__tooltip {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  background: rgba(30,30,30,0.9); color: #fff;
+  font-size: var(--font-size-ui-sm); padding: 3px 8px; border-radius: 4px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.15s; margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
+.dock-item:hover .dock-item__tooltip { opacity: 1; }
+
+.dock-item__icon {
+  width: 48px; height: 48px; position: relative;
+  /* Reflection via CSS — Chrome/Safari only, Firefox degrades gracefully (no reflection) */
+  -webkit-box-reflect: below 0px
+    -webkit-linear-gradient(top, transparent 50%, rgba(255,255,255,0.45) 100%);
+}
+.dock-item__icon img { width: 100%; height: 100%; object-fit: contain; }
+
+.dock-item__indicator {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(200,220,255,.9);
+  box-shadow: 0 0 4px 1px rgba(100,150,255,.6);
+  position: relative; z-index: 2; margin-top: -4px;
+}
+
+.dock-separator {
+  width: 1px; height: 24px; background: rgba(255,255,255,.3);
+  margin: 0 6px; align-self: flex-end; flex-shrink: 0;
+}
+
+/* Dock bounce when launching an app */
+@keyframes dock-bounce {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-18px); }
+  50% { transform: translateY(-4px); }
+  75% { transform: translateY(-10px); }
+}
+.dock-item--bouncing .dock-item__icon {
+  animation: dock-bounce 0.6s ease-out;
+}
+
+
+/* ============================================================
+   CONTEXT MENU
+   ============================================================ */
+.context-menu {
+  position: fixed; z-index: var(--z-context-menu);
+  background: rgba(240, 240, 240, 0.95);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0,0,0,.15); border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.1);
+  padding: 4px 0; min-width: 200px;
+}
+.context-menu__item {
+  display: block; width: 100%; text-align: left;
+  padding: 4px 16px; font-size: var(--font-size-ui); color: #222; border-radius: 0;
+}
+.context-menu__item:hover { background: var(--selection-blue); color: #fff; }
+.context-menu__item--disabled { color: #aaa; pointer-events: none; }
+.context-menu__separator { height: 1px; background: rgba(0,0,0,.1); margin: 4px 10px; }
+
+
+/* ============================================================
+   ABOUT THIS MAC DIALOG
+   ============================================================ */
+.about-mac-dialog {
+  border: none; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,.2);
+  padding: 0; max-width: 320px; width: 90%; background: #f0f0f0;
+  z-index: var(--z-dialog);
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;
+}
+.about-mac-dialog::backdrop { background: rgba(0,0,0,.3); }
+.about-mac__content { padding: 24px; text-align: center; position: relative; }
+.about-mac__close {
+  position: absolute; top: 8px; left: 12px; width: 12px; height: 12px;
+  border-radius: 50%; background: var(--btn-close); border: 1px solid var(--btn-close-border);
+  font-size: 0; cursor: pointer;
+}
+.about-mac__close:hover::after {
+  content: "\00d7"; font-size: 9px; font-weight: 700; color: #4a0e0b;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+.about-mac__logo { margin-bottom: 12px; }
+.about-mac__logo img { margin: 0 auto; }
+.about-mac__title { font-size: 16px; font-weight: 600; color: #222; margin-bottom: 2px; }
+.about-mac__subtitle { font-size: var(--font-size-ui-sm); color: #888; margin-bottom: 16px; }
+.about-mac__specs {
+  text-align: left; font-size: var(--font-size-ui);
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 16px;
+  margin-bottom: 16px; padding: 0 16px;
+}
+.about-mac__specs dt { color: #888; font-weight: 500; }
+.about-mac__specs dd { color: #333; }
+.about-mac__btn {
+  display: inline-block; font-size: var(--font-size-ui); color: var(--selection-blue);
+  padding: 4px 12px; border: 1px solid #ccc; border-radius: 4px;
+  background: linear-gradient(180deg, #fff, #eee);
+}
+.about-mac__btn:hover { background: linear-gradient(180deg, #f5f5f5, #e0e0e0); }
+
+
+/* ============================================================
+   MSN MESSENGER — Ven AI Chat
+   ============================================================ */
+/* Override the standard Snow Leopard titlebar for MSN windows */
+.window--msn .window__titlebar {
+  background: linear-gradient(180deg, #4a8ac7 0%, #2d6aab 50%, #1e5799 100%);
+  border-bottom: 1px solid #164580;
+}
+.window--msn .window__title { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.window--msn.window--inactive .window__titlebar {
+  background: linear-gradient(180deg, #8ab0d0 0%, #6a90b8 50%, #5a80a8 100%);
+}
+.window--msn.window--inactive .window__title { color: rgba(255,255,255,0.7); }
+.window--msn .window__body {
+  padding: 0; background: #d7e4f5; display: flex; flex-direction: column; overflow: hidden;
+}
+
+.msn-wrapper { display: flex; flex-direction: column; height: 100%; }
+
+.msn-titlebar {
+  background: linear-gradient(180deg, #d8e8f7 0%, #f5f2f9 50%, #d8e8f7 100%);
+  border-bottom: 1px solid #abb0c6;
+  padding: 6px 10px;
+  font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.msn-status-dot {
+  width: 8px; height: 8px;
+  background: #4caf50; border-radius: 50%;
+  border: 1px solid #2e7d32;
+  flex-shrink: 0;
+}
+
+.msn-chat-area {
+  flex: 1; background: #fff;
+  overflow-y: auto; padding: 10px;
+  font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+  font-size: 13px;
+  border: 1px solid #586170; border-radius: 4px;
+  margin: 6px 8px 0;
+}
+
+.msn-message { 
+  margin-bottom: 8px; 
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.msn-message__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.msn-message__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.msn-message--ven .msn-message__name {
+  color: #0066cc; font-weight: bold; font-size: 11px;
+}
+.msn-message--visitor .msn-message__name {
+  color: #8b0000; font-weight: bold; font-size: 11px;
+}
+
+.msn-message__text {
+  margin-top: 2px; line-height: 1.4;
+  word-wrap: break-word; overflow-wrap: break-word;
+}
+
+.msn-message__time {
+  font-size: 9px; color: #999; margin-left: 4px;
+}
+.msn-email-link {
+  color: #0066cc; text-decoration: underline; cursor: pointer;
+  font-weight: 600;
+}
+.msn-email-link:hover { color: #004499; }
+
+.msn-typing {
+  font-size: 11px; color: #888;
+  font-style: italic; padding: 2px 18px;
+  font-family: "Trebuchet MS", "Lucida Grande", sans-serif;
+  flex-shrink: 0;
+}
+
+.msn-status-bar {
+  font-size: 10px; color: navy;
+  font-family: Verdana, "Trebuchet MS", sans-serif;
+  font-weight: bold;
+  padding: 2px 10px; flex-shrink: 0;
+  border-top: 1px solid #abb0c6;
+  background: #fdfdff;
+  min-height: 18px;
+}
+
+.msn-toolbar {
+  display: flex; gap: 8px;
+  padding: 4px 10px;
+  border-top: 1px solid #abb0c6;
+  background: linear-gradient(180deg, #d8e8f7 0%, #f5f2f9 50%, #d8e8f7 100%);
+  font-size: 16px; flex-shrink: 0;
+}
+.msn-toolbar button {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; opacity: 0.6;
+  padding: 2px 4px; border-radius: 3px;
+}
+.msn-toolbar button:hover { opacity: 1; background: rgba(0,0,0,0.06); }
+
+.msn-input-area {
+  border-top: 1px solid #abb0c6;
+  padding: 8px;
+  display: flex; gap: 6px;
+  background: #d7e4f5;
+  flex-shrink: 0;
+}
+
+.msn-input {
+  flex: 1;
+  border: 1px solid #586170; border-radius: 3px;
+  padding: 6px 8px;
+  font-family: "Trebuchet MS", sans-serif; font-size: 13px;
+  outline: none;
+}
+.msn-input:focus { border-color: #4a8ac7; box-shadow: 0 0 3px rgba(74,138,199,0.4); }
+
+.msn-send-btn {
+  background: #fbfbfb;
+  color: #969c9a; font-weight: bold;
+  border: 1px solid #93989c; border-radius: 5px;
+  padding: 6px 14px; cursor: pointer;
+  font-size: 11px; font-family: Tahoma, sans-serif;
+  box-shadow: -2px -2px 4px #c0c9e0 inset;
+}
+.msn-send-btn:hover { background: #f0f0f0; color: #666; }
+.msn-send-btn:active { background: #e0e0e0; box-shadow: 2px 2px 4px #c0c9e0 inset; }
+
+/* Nudge shake animation */
+.msn-nudge {
+  animation: nudgeShake 0.1s ease-in-out 5;
+}
+@keyframes nudgeShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* MSN scrollbar — match the aqua style */
+.msn-chat-area::-webkit-scrollbar { width: 15px; height: 15px; }
+.msn-chat-area::-webkit-scrollbar-track {
+  background: linear-gradient(to right,
+    #c4c4c4, #d4d4d4 12%, #e4e4e4 30%, #ededed 50%, #e4e4e4 70%, #d4d4d4 88%, #c4c4c4);
+  border: 1px solid #a8a8a8; border-radius: 100px;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.22), inset -2px -2px 3px rgba(0,0,0,0.10);
+}
+.msn-chat-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right,
+    #1C5CB8 0%, #2870D0 10%, #3C8CE4 24%,
+    #54A4F0 38%, #6AB8F8 50%, #54A4F0 62%,
+    #3C8CE4 76%, #2870D0 90%, #1C5CB8 100%);
+  background-clip: padding-box; border: 2px solid transparent;
+  border-radius: 100px;
+  box-shadow: inset 0 4px 4px -1px rgba(255,255,255,0.85),
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -4px 5px -2px rgba(0,10,50,0.45);
+  min-height: 28px;
+}
+
+
+/* ============================================================
+   AQUA SLIDER THUMBS — Real Snow Leopard blue knob
+   ============================================================ */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  background: transparent; cursor: pointer;
+  height: 20px;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: linear-gradient(180deg, #b0b0b0, #d0d0d0);
+  border-radius: 2px; border: 1px solid #999;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px; height: 15px; margin-top: -6px;
+  background-image: url('assets/ui/aqua-slider-thumb.png');
+  background-size: contain; background-repeat: no-repeat;
+  border: none; border-radius: 50%;
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  background: linear-gradient(180deg, #b0b0b0, #d0d0d0);
+  border-radius: 2px; border: 1px solid #999;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 15px; height: 15px;
+  background-image: url('assets/ui/aqua-slider-thumb.png');
+  background-size: contain; border: none; border-radius: 50%;
+}
+
+
+/* ============================================================
+   CUSTOM SCROLLBAR — Authentic Aqua blue gel
+   Adapted from benchristel/aqua-scrollbars gist (MIT)
+   ============================================================ */
+/* ── Aqua Scrollbar (consolidated) ── */
+/* scrollbar-color removed — it disables ::-webkit-scrollbar in modern Chrome */
+.window__body::-webkit-scrollbar,
+.itunes-content::-webkit-scrollbar,
+.itunes-sidebar::-webkit-scrollbar,
+.safari-yt-page::-webkit-scrollbar { width: 15px; height: 15px; }
+
+/* Track — deeply recessed groove */
+.window__body::-webkit-scrollbar-track,
+.itunes-content::-webkit-scrollbar-track,
+.itunes-sidebar::-webkit-scrollbar-track,
+.safari-yt-page::-webkit-scrollbar-track {
+  background: linear-gradient(to right,
+    #c4c4c4, #d4d4d4 12%, #e4e4e4 30%, #ededed 50%, #e4e4e4 70%, #d4d4d4 88%, #c4c4c4);
+  border: 1px solid #a8a8a8;
+  border-radius: 100px;
+  box-shadow:
+    inset 2px 2px 4px rgba(0,0,0,0.22),
+    inset -2px -2px 3px rgba(0,0,0,0.10),
+    inset 0 0 6px rgba(0,0,0,0.08);
+}
+/* Horizontal track — rotate gradient */
+.window__body::-webkit-scrollbar-track:horizontal,
+.itunes-content::-webkit-scrollbar-track:horizontal,
+.itunes-sidebar::-webkit-scrollbar-track:horizontal,
+.safari-yt-page::-webkit-scrollbar-track:horizontal {
+  background: linear-gradient(to bottom,
+    #c4c4c4, #d4d4d4 12%, #e4e4e4 30%, #ededed 50%, #e4e4e4 70%, #d4d4d4 88%, #c4c4c4);
+}
+
+/* Thumb — Aqua gel capsule (bright, matching volume knob) */
+.window__body::-webkit-scrollbar-thumb,
+.itunes-content::-webkit-scrollbar-thumb,
+.itunes-sidebar::-webkit-scrollbar-thumb,
+.safari-yt-page::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right,
+    #1C5CB8 0%, #2870D0 10%, #3C8CE4 24%,
+    #54A4F0 38%, #6AB8F8 50%, #54A4F0 62%,
+    #3C8CE4 76%, #2870D0 90%, #1C5CB8 100%);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 100px;
+  box-shadow:
+    inset 0 4px 4px -1px rgba(255,255,255,0.85),
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -4px 5px -2px rgba(0,10,50,0.45),
+    inset 2px 0 3px -1px rgba(255,255,255,0.3),
+    inset -2px 0 3px -1px rgba(255,255,255,0.3);
+  min-height: 28px;
+  min-width: 28px;
+}
+/* Horizontal thumb — rotate gradient */
+.window__body::-webkit-scrollbar-thumb:horizontal,
+.itunes-content::-webkit-scrollbar-thumb:horizontal,
+.itunes-sidebar::-webkit-scrollbar-thumb:horizontal,
+.safari-yt-page::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(to bottom,
+    #1C5CB8 0%, #2870D0 10%, #3C8CE4 24%,
+    #54A4F0 38%, #6AB8F8 50%, #54A4F0 62%,
+    #3C8CE4 76%, #2870D0 90%, #1C5CB8 100%);
+}
+
+/* Thumb cursor — show it's draggable */
+.window__body::-webkit-scrollbar-thumb,
+.itunes-content::-webkit-scrollbar-thumb,
+.itunes-sidebar::-webkit-scrollbar-thumb,
+.safari-yt-page::-webkit-scrollbar-thumb { cursor: default; }
+
+/* Arrow buttons — both grouped at bottom/right (Mac OS X style) */
+/* Hide top (decrement) button for vertical */
+.window__body::-webkit-scrollbar-button:single-button:vertical:decrement,
+.itunes-content::-webkit-scrollbar-button:single-button:vertical:decrement,
+.itunes-sidebar::-webkit-scrollbar-button:single-button:vertical:decrement,
+.safari-yt-page::-webkit-scrollbar-button:single-button:vertical:decrement {
+  height: 0;
+  display: none;
+}
+/* Hide left (decrement) button for horizontal */
+.window__body::-webkit-scrollbar-button:single-button:horizontal:decrement,
+.itunes-content::-webkit-scrollbar-button:single-button:horizontal:decrement,
+.itunes-sidebar::-webkit-scrollbar-button:single-button:horizontal:decrement,
+.safari-yt-page::-webkit-scrollbar-button:single-button:horizontal:decrement {
+  width: 0;
+  display: none;
+}
+/* Bottom button — two visual buttons (up + down) with 3D groove divider */
+.window__body::-webkit-scrollbar-button:single-button:vertical:increment,
+.itunes-content::-webkit-scrollbar-button:single-button:vertical:increment,
+.itunes-sidebar::-webkit-scrollbar-button:single-button:vertical:increment,
+.safari-yt-page::-webkit-scrollbar-button:single-button:vertical:increment {
+  height: 34px;
+  display: block;
+  background:
+    linear-gradient(to bottom,
+      /* Top button — raised */
+      #eee 0%, #e6e6e6 6%, #ddd 40%,
+      /* Groove: dark edge, gap, light edge */
+      #aaa 46%, #999 47.5%, #888 49%,
+      #fff 51%, #eee 52.5%, #e8e8e8 54%,
+      /* Bottom button — raised */
+      #eee 56%, #e6e6e6 60%, #ddd 94%, #d0d0d0 100%),
+    linear-gradient(to right,
+      #c4c4c4, #d8d8d8 15%, #e8e8e8 35%, #f2f2f2 50%, #e8e8e8 65%, #d8d8d8 85%, #c4c4c4);
+  background-blend-mode: multiply, normal;
+  border: 1px solid #a0a0a0;
+  border-top: 1px solid #aaa;
+  border-radius: 0 0 6px 6px;
+  box-shadow:
+    inset 1px 0 1px rgba(255,255,255,0.4),
+    inset -1px 0 1px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -1px 1px rgba(0,0,0,0.08);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='28'%3E%3Cpath d='M1.5 10 L4.5 5 L7.5 10Z' fill='%23444'/%3E%3Cpath d='M1.5 18 L4.5 23 L7.5 18Z' fill='%23444'/%3E%3C/svg%3E");
+  background-size: 9px 28px;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: default;
+}
+/* Right button — two visual buttons (left + right) with 3D groove divider */
+.window__body::-webkit-scrollbar-button:single-button:horizontal:increment,
+.itunes-content::-webkit-scrollbar-button:single-button:horizontal:increment,
+.itunes-sidebar::-webkit-scrollbar-button:single-button:horizontal:increment,
+.safari-yt-page::-webkit-scrollbar-button:single-button:horizontal:increment {
+  width: 34px;
+  display: block;
+  background:
+    linear-gradient(to right,
+      /* Left button — raised */
+      #eee 0%, #e6e6e6 6%, #ddd 40%,
+      /* Groove */
+      #aaa 46%, #999 47.5%, #888 49%,
+      #fff 51%, #eee 52.5%, #e8e8e8 54%,
+      /* Right button — raised */
+      #eee 56%, #e6e6e6 60%, #ddd 94%, #d0d0d0 100%),
+    linear-gradient(to bottom,
+      #c4c4c4, #d8d8d8 15%, #e8e8e8 35%, #f2f2f2 50%, #e8e8e8 65%, #d8d8d8 85%, #c4c4c4);
+  background-blend-mode: multiply, normal;
+  border: 1px solid #a0a0a0;
+  border-left: 1px solid #aaa;
+  border-radius: 0 6px 6px 0;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.4),
+    inset 0 -1px 1px rgba(0,0,0,0.06),
+    inset 1px 0 0 rgba(255,255,255,0.5),
+    inset -1px 0 1px rgba(0,0,0,0.08);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='9'%3E%3Cpath d='M10 1.5 L5 4.5 L10 7.5Z' fill='%23444'/%3E%3Cpath d='M18 1.5 L23 4.5 L18 7.5Z' fill='%23444'/%3E%3C/svg%3E");
+  background-size: 28px 9px;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: default;
+}
+/* Corner piece */
+.window__body::-webkit-scrollbar-corner,
+.itunes-content::-webkit-scrollbar-corner,
+.itunes-sidebar::-webkit-scrollbar-corner,
+.safari-yt-page::-webkit-scrollbar-corner {
+  background: #e0e0e0;
+  border: 1px solid #a8a8a8;
+}
+
+/* ============================================================
+   AQUA GEL — Glossy shine overlay for all round buttons
+   ============================================================ */
+.itunes-hdr-btn::before,
+.mini-ctrl::before {
+  content: '';
+  position: absolute;
+  top: 1px; left: 10%;
+  width: 80%; height: 45%;
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0.8) 0%,
+    rgba(255,255,255,0.3) 50%,
+    rgba(255,255,255,0.0) 100%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* View toggle buttons — rectangular shine */
+.itunes-view-btn { position: relative; overflow: hidden; }
+.itunes-view-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 50%;
+  background: linear-gradient(to bottom,
+    rgba(255,255,255,0.6) 0%,
+    rgba(255,255,255,0.0) 100%);
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   WALLPAPER VARIANTS (image-based, cycled via JS)
+   ============================================================ */
+
+
+/* ============================================================
+   TOOLTIP
+   ============================================================ */
+.tooltip {
+  position: fixed; background: rgba(40,40,40,.9); color: #fff;
+  font-size: var(--font-size-ui-sm); padding: 4px 8px; border-radius: 4px;
+  pointer-events: none; z-index: 100; white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  will-change: transform;
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  #boot-screen { display: none !important; }
+  .window { opacity: 1 !important; transform: none !important; }
+}
+
+
+/* ============================================================
+   NEVARI (Safari 4 Browser)
+   ============================================================ */
+.window--safari .window__titlebar { border-bottom: none; }
+.window--safari .window__body {
+  display: flex; flex-direction: column; overflow: hidden;
+}
+
+.safari-toolbar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  background-image: var(--metal-noise), var(--metal-gradient);
+  border-bottom: 1px solid #999;
+}
+
+.safari-nav-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--aqua-grey); border: 1px solid #999;
+  box-shadow: var(--gel-highlight), var(--gel-shadow);
+  color: #555; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.safari-nav-btn:hover { background: var(--aqua-grey-pressed); }
+.safari-nav-btn:disabled { opacity: 0.4; cursor: default; }
+
+.safari-url-bar {
+  flex: 1; height: 24px; position: relative;
+  background: #fff; border: 2px solid #7ab8e0; border-radius: 14px;
+  display: flex; align-items: center;
+  padding: 0 10px 0 24px;
+  pointer-events: none; user-select: none;
+  overflow: hidden;
+}
+.safari-url-bar__lock {
+  position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+  color: #666; font-size: 10px;
+  display: flex; align-items: center;
+}
+.safari-url-bar__text {
+  font-size: 12px; color: #333; font-family: 'Lucida Grande', sans-serif;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  position: relative; z-index: 1;
+}
+.safari-url-bar__progress {
+  position: absolute; left: 0; top: 0; height: 100%;
+  background: linear-gradient(90deg, rgba(120,180,240,0.3), rgba(80,150,220,0.2));
+  border-radius: 14px; width: 0%; transition: width 0.3s;
+}
+
+.safari-bookmarks-bar {
+  display: flex; align-items: center; gap: 2px;
+  padding: 4px 8px;
+  background: linear-gradient(180deg, #e8e8e8, #d8d8d8);
+  border-bottom: 1px solid #bbb;
+  font-size: 11px; overflow-x: auto;
+  font-family: 'Lucida Grande', sans-serif;
+}
+.safari-bookmark {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 3px;
+  cursor: pointer; white-space: nowrap; color: #333;
+  border: none; background: none; font: inherit;
+}
+.safari-bookmark:hover { background: rgba(0,0,0,0.08); }
+.safari-bookmark--active { background: rgba(0,0,0,0.12); font-weight: 600; }
+.safari-bookmark__dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.safari-content {
+  flex: 1; background: #fff; position: relative; overflow: hidden;
+}
+.safari-content iframe {
+  width: 100%; height: 100%; border: none;
+}
+
+/* YouTube channel page */
+.safari-yt-page {
+  height: 100%; overflow-y: auto; background: #f9f9f9;
+  font-family: 'Lucida Grande', sans-serif;
+}
+.safari-yt-channel {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+}
+.safari-yt-channel__avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #c00; color: #fff;
+  font-size: 22px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.safari-yt-channel__info { flex: 1; }
+.safari-yt-channel__name { font-size: 16px; font-weight: 700; color: #0f0f0f; }
+.safari-yt-channel__handle { font-size: 12px; color: #606060; }
+.safari-yt-channel__link {
+  padding: 8px 16px; background: #0f0f0f; color: #fff;
+  border-radius: 18px; text-decoration: none;
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.safari-yt-channel__link:hover { background: #272727; }
+
+.safari-yt-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 16px; padding: 16px 20px;
+}
+.safari-yt-card { display: flex; flex-direction: column; }
+.safari-yt-card iframe {
+  width: 100%; aspect-ratio: 16/9; border: none; border-radius: 12px;
+}
+.safari-yt-card__thumb {
+  width: 100%; aspect-ratio: 16/9; border-radius: 12px;
+  background-size: cover; background-position: center;
+  cursor: pointer; position: relative;
+}
+.safari-yt-card__play {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(0,0,0,0.65);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.safari-yt-card__thumb:hover .safari-yt-card__play {
+  background: rgba(200,0,0,0.85);
+}
+.safari-yt-card__title {
+  padding: 8px 2px 0; font-size: 13px; font-weight: 500;
+  color: #0f0f0f; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Site card fallback (for sites that block iframes) */
+.safari-site-card-wrap {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; background: #f7f9fa;
+  font-family: 'Lucida Grande', sans-serif;
+}
+.safari-site-card {
+  text-align: center; padding: 40px;
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  max-width: 320px; width: 100%;
+}
+.safari-site-card__avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  color: #fff; font-size: 28px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+}
+.safari-site-card__name { font-size: 18px; font-weight: 700; color: #0f1419; margin-bottom: 4px; }
+.safari-site-card__bio { font-size: 13px; color: #536471; margin: 0 0 16px; }
+.safari-site-card__link {
+  display: inline-block; padding: 10px 24px;
+  background: #0f1419; color: #fff; border-radius: 20px;
+  text-decoration: none; font-size: 14px; font-weight: 600;
+}
+.safari-site-card__link:hover { background: #272c30; }
+.safari-site-card__note {
+  font-size: 11px; color: #999; margin: 16px 0 0;
+}
+
+/* ============================================================
+   NEVCAL — iCal Snow Leopard Booking
+   ============================================================ */
+.window--nevcal .window__titlebar {
+  background: linear-gradient(180deg, #e8e0d4 0%, #d4cabb 50%, #c8bfae 100%);
+  border-bottom: 1px solid #a09080;
+}
+.window--nevcal .window__body {
+  padding: 0; background: #f5f3ef; display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* Leather-stitched header */
+.ical-header {
+  background: linear-gradient(180deg, #8c7560 0%, #6b5442 50%, #5a4535 100%);
+  border-bottom: 2px solid #3a2e22;
+  padding: 14px 16px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: relative;
+}
+.ical-header::after {
+  content: ''; position: absolute; bottom: 4px; left: 12px; right: 12px;
+  border-bottom: 1px dashed rgba(255,255,255,0.18);
+}
+.ical-header__title {
+  color: #fff; font-size: 15px; font-weight: 700;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+  letter-spacing: 0.3px;
+}
+.ical-header__subtitle {
+  color: rgba(255,255,255,0.65); font-size: 11px; font-weight: 400;
+  margin-top: 1px;
+}
+.ical-nav {
+  display: flex; gap: 4px;
+}
+.ical-nav-btn {
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.25);
+  border-radius: 3px; color: #fff; font-size: 13px; cursor: pointer;
+  padding: 2px 8px; line-height: 1;
+}
+.ical-nav-btn:hover { background: rgba(0,0,0,0.35); }
+.ical-nav-btn:active { background: rgba(0,0,0,0.45); }
+
+/* Views container */
+.ical-views { flex: 1; overflow-y: auto; position: relative; }
+.ical-view { display: none; height: 100%; }
+.ical-view--active { display: flex; flex-direction: column; }
+
+/* Passcode view */
+.ical-passcode {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 40px 24px; text-align: center;
+}
+.ical-passcode__icon { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.6; }
+.ical-passcode__title {
+  font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px;
+}
+.ical-passcode__desc {
+  font-size: 12px; color: #888; margin-bottom: 20px; max-width: 280px;
+}
+.ical-passcode__input-wrap {
+  display: flex; gap: 8px; align-items: center;
+}
+.ical-passcode__input {
+  border: 1px solid #c0c0c0; border-radius: 4px; padding: 6px 12px;
+  font-size: 13px; font-family: var(--font-system); width: 200px;
+  outline: none; text-align: center; letter-spacing: 1px;
+}
+.ical-passcode__input:focus { border-color: #4ca4e8; box-shadow: 0 0 0 2px rgba(76,164,232,0.2); }
+.ical-passcode__btn {
+  background: linear-gradient(180deg,
+    #7ec8fb 0%, #4ca4e8 25%, #3580d4 50%, #4ca4e8 75%, #6ab4f0 100%);
+  color: #fff; border-radius: 5px; padding: 6px 16px;
+  font-size: 12px; font-weight: 500; border: 1px solid #2060a0;
+  cursor: pointer;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.15);
+}
+.ical-passcode__btn:hover { background: linear-gradient(180deg,
+  #8cd4ff 0%, #5cb0f0 25%, #4090e0 50%, #5cb0f0 75%, #7ac0f5 100%); }
+.ical-passcode__btn:active { background: linear-gradient(180deg,
+  #5098d0 0%, #3580c4 25%, #2a6ab4 50%, #3580c4 75%, #4ca4e0 100%); }
+.ical-passcode__btn:disabled { opacity: 0.5; cursor: default; }
+.ical-passcode__error {
+  color: #c00; font-size: 11px; margin-top: 12px; min-height: 16px;
+}
+
+/* Type selection view */
+.ical-types {
+  padding: 24px; flex: 1;
+}
+.ical-types__title {
+  font-size: 13px; font-weight: 600; color: #555; margin-bottom: 16px;
+}
+.ical-type-card {
+  display: flex; align-items: center; padding: 14px 16px;
+  border: 1px solid #d8d4ce; border-radius: 6px; margin-bottom: 10px;
+  cursor: pointer; background: #fff; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ical-type-card:hover {
+  border-color: #4ca4e8; box-shadow: 0 1px 4px rgba(76,164,232,0.15);
+}
+.ical-type-card__dot {
+  width: 10px; height: 10px; border-radius: 50%; margin-right: 12px; flex-shrink: 0;
+}
+.ical-type-card__info { flex: 1; }
+.ical-type-card__name { font-size: 13px; font-weight: 600; color: #333; }
+.ical-type-card__meta {
+  font-size: 11px; color: #888; margin-top: 2px;
+}
+
+/* Calendar month grid */
+.ical-calendar { padding: 12px 16px; flex: 1; }
+.ical-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.ical-day-header {
+  text-align: center; font-size: 10px; color: #999;
+  padding: 4px 0; font-weight: 600; text-transform: uppercase;
+}
+.ical-day {
+  text-align: center; padding: 6px 2px 8px; font-size: 12px;
+  cursor: default; position: relative; border-radius: 4px;
+  min-height: 34px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.ical-day--available {
+  cursor: pointer; font-weight: 600; color: #333;
+}
+.ical-day--available:hover { background: rgba(76,164,232,0.1); }
+.ical-day--selected {
+  background: #3580d4 !important; color: #fff !important;
+  border-radius: 50%; font-weight: 700;
+}
+.ical-day--today {
+  color: #3580d4; font-weight: 700;
+}
+.ical-day--past, .ical-day--unavailable { color: #ccc; }
+.ical-day--empty { visibility: hidden; }
+.ical-day__dot {
+  width: 4px; height: 4px; background: #3580d4;
+  border-radius: 50%; margin-top: 2px;
+}
+.ical-day--selected .ical-day__dot { background: rgba(255,255,255,0.7); }
+
+/* Back button */
+.ical-back {
+  background: none; border: none; color: #3580d4; font-size: 12px;
+  cursor: pointer; padding: 0; margin-bottom: 12px; display: inline-flex;
+  align-items: center; gap: 4px;
+}
+.ical-back:hover { text-decoration: underline; }
+
+/* Time slots view */
+.ical-slots-wrap { padding: 16px; flex: 1; overflow-y: auto; }
+.ical-slots-date {
+  font-size: 13px; font-weight: 600; color: #555; margin-bottom: 12px;
+}
+.ical-slot {
+  padding: 10px 14px; border: 1px solid #d8d4ce; border-radius: 5px;
+  margin-bottom: 8px; cursor: pointer; background: #fff;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.ical-slot:hover {
+  border-color: #4ca4e8; background: rgba(76,164,232,0.04);
+}
+.ical-slot__time { font-size: 13px; font-weight: 600; color: #333; }
+.ical-slot__tz { font-size: 11px; color: #999; }
+
+/* Booking form view */
+.ical-form { padding: 20px 24px; flex: 1; overflow-y: auto; }
+.ical-form__summary {
+  font-size: 12px; color: #666; background: #eeeae4;
+  padding: 10px 14px; border-radius: 5px; margin-bottom: 16px;
+  border: 1px solid #d8d4ce;
+}
+.ical-form__summary strong { color: #333; }
+.ical-form__group { margin-bottom: 14px; }
+.ical-form__label {
+  display: block; font-size: 11px; font-weight: 600; color: #666;
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ical-form__input {
+  width: 100%; border: 1px solid #c0c0c0; border-radius: 4px;
+  padding: 7px 10px; font-size: 13px; font-family: var(--font-system);
+  outline: none; box-sizing: border-box;
+}
+.ical-form__input:focus { border-color: #4ca4e8; box-shadow: 0 0 0 2px rgba(76,164,232,0.2); }
+.ical-form__input--error { border-color: #c00; }
+.ical-form__textarea {
+  width: 100%; border: 1px solid #c0c0c0; border-radius: 4px;
+  padding: 7px 10px; font-size: 13px; font-family: var(--font-system);
+  outline: none; resize: vertical; min-height: 60px; box-sizing: border-box;
+}
+.ical-form__textarea:focus { border-color: #4ca4e8; box-shadow: 0 0 0 2px rgba(76,164,232,0.2); }
+.ical-form__actions {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;
+}
+.ical-form__submit {
+  background: linear-gradient(180deg,
+    #7ec8fb 0%, #4ca4e8 25%, #3580d4 50%, #4ca4e8 75%, #6ab4f0 100%);
+  color: #fff; border-radius: 5px; padding: 7px 24px;
+  font-size: 13px; font-weight: 500; border: 1px solid #2060a0;
+  cursor: pointer;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.15);
+}
+.ical-form__submit:hover { background: linear-gradient(180deg,
+  #8cd4ff 0%, #5cb0f0 25%, #4090e0 50%, #5cb0f0 75%, #7ac0f5 100%); }
+.ical-form__submit:disabled { opacity: 0.5; cursor: default; }
+.ical-form__cancel {
+  background: linear-gradient(180deg, #fafafa, #e8e8e8);
+  border: 1px solid #c0c0c0; border-radius: 5px; padding: 7px 16px;
+  font-size: 13px; cursor: pointer; color: #333;
+}
+
+/* Confirmation view */
+.ical-confirm {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 40px 24px; text-align: center;
+}
+.ical-confirm__check {
+  width: 48px; height: 48px; background: #5AC837; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.ical-confirm__check svg { width: 24px; height: 24px; }
+.ical-confirm__title {
+  font-size: 17px; font-weight: 700; color: #333; margin-bottom: 8px;
+}
+.ical-confirm__detail {
+  font-size: 13px; color: #555; margin-bottom: 4px;
+}
+.ical-confirm__email {
+  font-size: 12px; color: #888; margin-top: 12px;
+}
+.ical-confirm__close {
+  margin-top: 24px;
+  background: linear-gradient(180deg, #fafafa, #e8e8e8);
+  border: 1px solid #c0c0c0; border-radius: 5px; padding: 7px 20px;
+  font-size: 13px; cursor: pointer; color: #333;
+}
+
+/* Loading spinner */
+.ical-loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px; color: #888; font-size: 12px; flex: 1;
+}
+.ical-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid #e0e0e0; border-top-color: #3580d4;
+  border-radius: 50%; animation: ical-spin 0.6s linear infinite;
+  margin-right: 8px;
+}
+@keyframes ical-spin { to { transform: rotate(360deg); } }
+
+/* Error state */
+.ical-error {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 40px 24px; text-align: center;
+}
+.ical-error__msg { font-size: 13px; color: #c00; margin-bottom: 16px; }
+.ical-error__retry {
+  background: linear-gradient(180deg, #fafafa, #e8e8e8);
+  border: 1px solid #c0c0c0; border-radius: 5px; padding: 6px 16px;
+  font-size: 12px; cursor: pointer; color: #333;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 768px) {
+  :root { --dock-height: 0px; }
+
+  /* iTunes (full app) mobile tweaks */
+  .window--itunes .itunes-sidebar { display: none; }
+  .window--itunes .itunes-header__search { display: none; }
+  .window--itunes .itunes-display__title { max-width: 100%; }
+  .window--itunes .itunes-display__elapsed,
+  .window--itunes .itunes-display__remaining {
+    width: 32px;
+    min-width: 32px;
+    flex: 0 0 32px;
+  }
+  .menu-bar { background: rgba(232, 232, 232, 0.95); backdrop-filter: none; }
+  .menu-bar__item { display: none; }
+  /* Show all social icons on mobile */
+
+  .desktop-icons {
+    position: absolute; inset: auto 0 16px 0;
+    display: flex; flex-direction: row; flex-wrap: wrap;
+    justify-content: center; gap: 12px; padding: 0 16px;
+  }
+  .desktop-icon { position: static !important; width: 64px; }
+  .desktop-icon--personality, .desktop-icon--trash { display: none; }
+  .desktop-icon--easter-egg { position: absolute !important; }
+  .desktop-icon__img { width: 48px; height: 48px; }
+  .desktop-icon__label { font-size: 10px; }
+  .dock { display: none; }
+  .desktop { bottom: 0; }
+
+  .window {
+    position: fixed !important; top: var(--menubar-height) !important;
+    left: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 100% !important; height: calc(100% - var(--menubar-height)) !important;
+    border-radius: 0; transform: none;
+  }
+  .window.window--visible { transform: none; }
+  .window__titlebar { cursor: default; }
+  .traffic-light--close { width: 16px; height: 16px; }
+  .window__resize { display: none; }
+
+  /* iTunes mini player — slightly off-center popup on mobile */
+  .window--itunes-mini {
+    top: 42% !important; left: 48% !important;
+    right: auto !important; bottom: auto !important;
+    width: 280px !important; height: auto !important;
+    border-radius: 6px;
+    transform: translate(-50%, -50%) !important;
+  }
+  .window--itunes-mini.window--visible {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  /* LimeWire — small popup on mobile */
+  .window--limewire {
+    top: 50% !important; left: 50% !important;
+    right: auto !important; bottom: auto !important;
+    width: 90% !important; max-width: 340px !important;
+    height: auto !important; max-height: 60vh !important;
+    border-radius: 6px;
+    transform: translate(-50%, -50%) !important;
+    overflow: auto;
+  }
+  .window--limewire.window--visible {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  /* YouTube grid stacks to single column on mobile */
+  .safari-yt-grid { grid-template-columns: 1fr; }
+
+  /* Easter egg icons — scattered on mobile, not in the flex row */
+  .desktop-icon.desktop-icon--easter-egg {
+    position: fixed !important;
+    left: auto !important; bottom: auto !important;
+    width: 48px !important;
+    opacity: 0.85;
+    text-align: center;
+    z-index: 50;
+    display: flex !important; flex-direction: column; align-items: center;
+  }
+  /* Scatter each easter egg at a different spot */
+  .desktop-icon.desktop-icon--easter-egg[data-opens="video-retrocomputer"] {
+    top: 28% !important; right: 20px !important;
+  }
+  .desktop-icon.desktop-icon--easter-egg[data-opens="limewire"] {
+    top: 48% !important; left: 14px !important; right: auto !important;
+  }
+  .desktop-icon.desktop-icon--easter-egg .desktop-icon__img {
+    width: 40px !important; height: 40px !important;
+    overflow: hidden;
+    margin: 0 auto;
+  }
+  .desktop-icon.desktop-icon--easter-egg .desktop-icon__img .video-thumb {
+    width: 40px !important; height: 40px !important;
+  }
+  .desktop-icon.desktop-icon--easter-egg .desktop-icon__img .video-thumb img {
+    width: 40px !important; height: 40px !important;
+  }
+  .desktop-icon.desktop-icon--easter-egg .desktop-icon__label {
+    font-size: 9px !important;
+    margin-top: 3px;
+    position: relative;
+    z-index: 51;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  /* MSN Messenger mobile tweaks */
+  .msn-wrapper { height: 100%; }
+  .msn-chat-area { margin: 4px; }
+
+  /* Prevent iOS auto-zoom on input focus (needs >= 16px) */
+  .mail-field input,
+  .mail-body textarea,
+  .msn-input { font-size: 16px; }
+
+  /* Mail + MSN as floating cards instead of fullscreen */
+  .window--mail {
+    bottom: auto !important;
+    height: auto !important;
+    max-height: 85vh;
+    border-radius: 8px;
+    margin: 16px 0 0;
+    width: calc(100% - 16px) !important;
+    left: 8px !important; right: auto !important;
+  }
+  .window--msn {
+    bottom: auto !important;
+    height: 50vh !important;
+    border-radius: 8px;
+    margin: 16px 0 0;
+    width: calc(100% - 16px) !important;
+    left: 8px !important; right: auto !important;
+  }
+
+  /* iTunes mobile fixes — hide sidebar, hide search, fix player controls */
+  .window--itunes .itunes-sidebar {
+    display: none;
+  }
+  .window--itunes .itunes-header__search {
+    display: none;
+  }
+  /* Make header display use more space now that search is hidden */
+  .window--itunes .itunes-header__display {
+    flex: 1;
+    min-width: 0; /* Allow flex shrinking */
+  }
+  /* Fixed widths for time displays so controls don't jump */
+  .window--itunes .itunes-display__elapsed,
+  .window--itunes .itunes-display__remaining {
+    min-width: 32px;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  /* Ensure title truncates properly on mobile */
+  .window--itunes .itunes-display__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}

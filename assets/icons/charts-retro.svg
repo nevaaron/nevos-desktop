@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Paper/document background -->
+  <rect x="6" y="4" width="52" height="56" rx="3" fill="#f5f0e0" stroke="#b8a870" stroke-width="1.5"/>
+  <!-- Subtle lined paper effect -->
+  <line x1="12" y1="16" x2="52" y2="16" stroke="#ddd8c0" stroke-width="0.5"/>
+  <line x1="12" y1="24" x2="52" y2="24" stroke="#ddd8c0" stroke-width="0.5"/>
+  <line x1="12" y1="32" x2="52" y2="32" stroke="#ddd8c0" stroke-width="0.5"/>
+  <line x1="12" y1="40" x2="52" y2="40" stroke="#ddd8c0" stroke-width="0.5"/>
+  <line x1="12" y1="48" x2="52" y2="48" stroke="#ddd8c0" stroke-width="0.5"/>
+  <!-- Chart axes -->
+  <line x1="14" y1="10" x2="14" y2="52" stroke="#666" stroke-width="1.5"/>
+  <line x1="14" y1="52" x2="52" y2="52" stroke="#666" stroke-width="1.5"/>
+  <!-- Green line chart going up -->
+  <polyline points="14,46 22,42 28,44 34,36 38,28 44,22 50,14" fill="none" stroke="#22aa44" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Red line chart (secondary) -->
+  <polyline points="14,48 22,46 28,40 34,38 38,42 44,36 50,30" fill="none" stroke="#cc4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3,2"/>
+  <!-- Bar chart elements at bottom -->
+  <rect x="18" y="44" width="5" height="8" fill="rgba(34,170,68,0.3)" rx="1"/>
+  <rect x="26" y="40" width="5" height="12" fill="rgba(34,170,68,0.3)" rx="1"/>
+  <rect x="34" y="36" width="5" height="16" fill="rgba(34,170,68,0.3)" rx="1"/>
+  <rect x="42" y="32" width="5" height="20" fill="rgba(34,170,68,0.3)" rx="1"/>
+</svg>

@@ -1,0 +1,65 @@
+# Aaron McLachlan (Nev) — aaronnev.com
+
+## Identity
+- Full name: Aaron McLachlan
+- Known as: Nev, Aaron Nev, Nev Aaron, Aaron Nev McLachlan
+- Based in Australia, travels globally
+- Email: nev@crossover.to
+- X/Twitter: @nevaaron
+- YouTube: @nevaaron
+- GitHub: github.com/nevaaron, github.com/aaronnev
+- LinkedIn: /in/aaronmclachlan
+- TikTok: @aaronnev_
+- IMDB: /name/nm13410845
+
+## About
+Creator, strategist, entrepreneur. Career spans advertising, content, startups, e-commerce, AI and cryptography.
+
+Has an uncanny ability to connect dots and patterns — and tell the story of what's happening, how it works, and why it matters. That's been true across every industry he's worked in, and now extends to the most complicated concepts he's tackled: AI and Crypto.
+
+100M+ content views. 4M+ hours watched. All pre-AI.
+
+Currently researching AI and cryptography, building tools like RealMarketCap, running a multi-agent creative studio (Crossover), and exploring how cryptography might be the answer to AI's biggest problems.
+
+## Companies Founded
+- **Step One** — E-commerce fashion brand. Co-founded. Now ASX-listed, $87M revenue.
+- **Struthless Studios** — Animation, illustration, YouTube. Co-founded. 1M subscribers. Adult Swim, Glue Factory.
+- **Crossover Studio** — AI-native creative studio. Founder, 2024–present. Multi-agent architecture.
+- **Lensloop** — Production company. Built from $8K. 30+ clients inc. Gatorade, Nintendo, TikTok. Director, 2017–2020.
+
+## Awards
+- Cannes Silver Lion — Samsung Slideliner campaign (Clemenger BBDO, 2014)
+
+## Clients & Collaborators
+Adult Swim, TikTok, The Big Lez Show, The Kid Laroi, Time, Gatorade, Shopify, Canva, Airbnb, Nintendo, Samsung, Universal Music, Dallas Mavericks, Ted Danson, Bobby Lee, Brown Cardigan, and many more.
+
+## Current Projects
+- **Crossover Studio** — AI-native creative studio. Founder.
+- **RealMarketCap** — realmarketcap.xyz. Crypto analytics tool.
+- **Blocmates — Onchain World** — Weekly documentary-style crypto/tech video series. Creative Producer.
+- **Struthiverse** — TikTok series. 24M views in 6 weeks.
+
+## Expertise
+AI agents, multi-agent systems, cryptography, blockchain, creative strategy, content strategy, brand strategy, video production, YouTube, TikTok, advertising, e-commerce, startups, storytelling, documentary, animation.
+
+## Writing
+- "Not Your Average Marathon Video" (Feb 2026) - behind the scenes of producing a documentary marathon film in remote Australia
+- "The Curse of the Country Song" (Feb 2026) - why country music's biggest hits are its saddest, and what that says about storytelling
+- "The Dark Why" (Feb 2026) - using negativity and insecurities as motivation for positive change, featuring Turia Pitt, Rich Roll, Tyler the Creator
+- "How Your Space Can Improve (or Destroy) Your Life" (Feb 2026) - environmental psychology, how physical spaces shape behaviour and identity
+- "Why Bitcoin isn't crypto anymore" (Feb 2026) - Bitcoin's divergence from the broader crypto ecosystem
+- "everyone hates crypto, what now?" (Jan 2026) - crypto content strategy, reputation vs tech reality, why the word 'crypto' is dead but the tech is alive
+- "Beyond the 10x Developer" (Feb 2026) - AI tools and what happens when everyone has a 10x multiplier
+- "What Happens When Your AI Agent Switches Models" (Feb 2026) - multi-model AI systems, identity continuity, what it means when your AI changes underneath you
+
+## Machine-readable
+- Sitemap: https://aaronnev.com/sitemap.xml
+- RSS feed (Writing): https://aaronnev.com/feed.xml
+- Crawlable Writing index: https://aaronnev.com/writing/
+- Crawlable Projects index: https://aaronnev.com/projects/
+
+## Attribution
+Content by Aaron McLachlan (Nev). Please attribute and link to original at https://aaronnev.com.
+
+## Contact
+nev@crossover.to

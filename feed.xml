@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Aaron Nev - Writing</title>
+    <link>https://aaronnev.com/writing/</link>
+    <description>Writing by Aaron McLachlan (Nev).</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 28 Feb 2026 12:00:00 GMT</lastBuildDate>
+    <generator>generate-feed.js</generator>
+    <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="https://aaronnev.com/feed.xml" rel="self" type="application/rss+xml" />
+
+    <item>
+      <title>Not Your Average Marathon Video</title>
+      <link>https://aaronnev.com/writing/not-your-average-marathon-video/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/not-your-average-marathon-video/</guid>
+      <pubDate>Sat, 28 Feb 2026 12:00:00 GMT</pubDate>
+      <description>Originally produced as a video for Struthless. A story about motivation, commitment devices, and how the finish line kills your former self.</description>
+    </item>
+    <item>
+      <title>The Curse of the Country Song</title>
+      <link>https://aaronnev.com/writing/the-curse-of-the-country-song/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/the-curse-of-the-country-song/</guid>
+      <pubDate>Thu, 26 Feb 2026 12:00:00 GMT</pubDate>
+      <description>Originally created for Struthless in April 2023. A story about creativity, failure, and why the goals you abandon can teach you more than the ones you hit.</description>
+    </item>
+    <item>
+      <title>The Dark Why</title>
+      <link>https://aaronnev.com/writing/the-dark-why/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/the-dark-why/</guid>
+      <pubDate>Wed, 25 Feb 2026 12:00:00 GMT</pubDate>
+      <description>Originally created for Struthless in December 2022. 340K+ views. Based on research into motivation, negativity bias, and the psychology of using setbacks to fuel forward momentum.</description>
+    </item>
+    <item>
+      <title>How Your Space Can Improve (or Destroy) Your Life</title>
+      <link>https://aaronnev.com/writing/how-your-space-can-improve-or-destroy-your-life/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/how-your-space-can-improve-or-destroy-your-life/</guid>
+      <pubDate>Wed, 25 Feb 2026 12:00:00 GMT</pubDate>
+      <description>Originally produced as a video documentary for Struthless in November 2022. Directed by Campbell Walker &amp; Aaron McLachlan. Produced by Aaron McLachlan &amp; Billy Guest. 1.35M+ views.</description>
+    </item>
+    <item>
+      <title>Why Bitcoin isn&amp;rsquo;t crypto anymore</title>
+      <link>https://aaronnev.com/writing/why-bitcoin-isnt-crypto-anymore/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/why-bitcoin-isnt-crypto-anymore/</guid>
+      <pubDate>Mon, 23 Feb 2026 12:00:00 GMT</pubDate>
+      <description>The decoupling of Bitcoin from the rest of crypto is happening in real time and has been for a while. Jack Dorsey kind of just went and said it out loud.</description>
+    </item>
+    <item>
+      <title>What Happens When Your AI Agent Switches Models</title>
+      <link>https://aaronnev.com/writing/what-happens-when-your-ai-agent-switches-models/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/what-happens-when-your-ai-agent-switches-models/</guid>
+      <pubDate>Sun, 01 Feb 2026 12:00:00 GMT</pubDate>
+      <description>Coming soon.</description>
+    </item>
+    <item>
+      <title>Beyond the 10x Developer</title>
+      <link>https://aaronnev.com/writing/beyond-the-10x-developer/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/beyond-the-10x-developer/</guid>
+      <pubDate>Sun, 01 Feb 2026 12:00:00 GMT</pubDate>
+      <description>Coming soon.</description>
+    </item>
+    <item>
+      <title>everyone hates crypto, what now?</title>
+      <link>https://aaronnev.com/writing/everyone-hates-crypto-what-now/</link>
+      <guid isPermaLink="true">https://aaronnev.com/writing/everyone-hates-crypto-what-now/</guid>
+      <pubDate>Tue, 13 Jan 2026 12:00:00 GMT</pubDate>
+      <description>Crypto is in a weird spot right now. Actually, weird is generous. Everyone hates it, which is far worse than indifference. And this isn&apos;t just a content creator problem. If you&apos;re building a product and the word &apos;crypto&apos; is attached to i...</description>
+    </item>
+
+  </channel>
+</rss>

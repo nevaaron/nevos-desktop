@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Sitemap: https://aaronnev.com/sitemap.xml
+
+# AI/LLM context
+# See https://llmstxt.org for the llms.txt standard
+# llms.txt: https://aaronnev.com/llms.txt

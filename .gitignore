@@ -1,0 +1,9 @@
+.vercel
+.DS_Store
+node_modules/
+assets/Icons/
+assets/references/
+*:Zone.Identifier
+.env
+PUBLISHING.md
+.gstack/

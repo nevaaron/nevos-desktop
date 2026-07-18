@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="tubeRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ef2020"/>
+      <stop offset="50%" stop-color="#cc0000"/>
+      <stop offset="100%" stop-color="#a00000"/>
+    </linearGradient>
+    <linearGradient id="tubeShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.45)"/>
+      <stop offset="45%" stop-color="rgba(255,255,255,0.05)"/>
+      <stop offset="46%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.15)"/>
+    </linearGradient>
+  </defs>
+  <!-- White background card -->
+  <rect x="2" y="2" width="60" height="60" rx="10" fill="#fff"/>
+  <rect x="2" y="2" width="60" height="60" rx="10" fill="none" stroke="#ccc" stroke-width="1"/>
+  <!-- "You" text -->
+  <text x="32" y="22" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="bold" fill="#333" text-anchor="middle" letter-spacing="-0.5">You</text>
+  <!-- Red rounded rectangle -->
+  <rect x="6" y="26" width="52" height="30" rx="7" fill="url(#tubeRed)"/>
+  <!-- Glossy shine -->
+  <rect x="6" y="26" width="52" height="30" rx="7" fill="url(#tubeShine)"/>
+  <!-- "Tube" text -->
+  <text x="32" y="48" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#fff" text-anchor="middle" letter-spacing="-0.5">Tube</text>
+</svg>
